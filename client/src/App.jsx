@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { Chat } from './page/Chess';
-import Login from './page/login';
+import Login from './page/Login';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import Landing from './page/landing';
