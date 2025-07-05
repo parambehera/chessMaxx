@@ -2,6 +2,8 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const dotenv = require('dotenv');
+dotenv.config(); // Load environment variables from .env file
 
 const app = express();
 const server = http.createServer(app);
