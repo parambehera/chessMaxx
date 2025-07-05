@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { Chessboard } from "react-chessboard";

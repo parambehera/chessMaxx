@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom"
 import { Crown, Zap, Users, Trophy } from "lucide-react"
 
-const Landing = () => {
+export const Landing = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Header */}
@@ -171,4 +171,4 @@ const Landing = () => {
   )
 }
 
-export default Landing
+

@@ -1,11 +1,10 @@
-"use client"
 import { auth } from "../firebase"
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth"
 import { useNavigate, Link } from "react-router-dom"
 import { Crown } from "lucide-react"
 import toast, { Toaster } from 'react-hot-toast';
 
-const Login = ({ setUsername }) => {
+export const Login = ({ setUsername }) => {
   const navigate = useNavigate()
 
   const handleGoogleLogin = async () => {
@@ -91,4 +90,4 @@ const Login = ({ setUsername }) => {
   )
 }
 
-export default Login
+
