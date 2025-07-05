@@ -7,7 +7,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:5173',
+    origin: process.env.VITE_SOCKET_URL ,// Use VITE_SOCKET_URL or default to localhost
     methods: ['GET', 'POST'],
     credentials: true,
   },

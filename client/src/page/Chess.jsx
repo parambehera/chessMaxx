@@ -50,7 +50,7 @@ export function Chat({ username }) {
 
   // ✅ Setup socket and listeners
   useEffect(() => {
-    const socket = io("http://localhost:4000");
+    const socket = io(import.meta.env.VITE_SOCKET_URL );
     socketRef.current = socket;
 
     socket.on("match-found", ({ color, roomId, timers }) => {
