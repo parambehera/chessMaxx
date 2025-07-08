@@ -50,7 +50,7 @@ export function Chat({ username }) {
 
   // ✅ Setup socket and listeners
   useEffect(() => {
-    const socket = io(import.meta.env.VITE_SOCKET_URL );
+    const socket = io("https://chessmaxx.onrender.com");
     socketRef.current = socket;
 
     socket.on("match-found", ({ color, roomId, timers }) => {
