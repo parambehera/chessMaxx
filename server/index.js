@@ -9,13 +9,13 @@ const app = express();
 const server = http.createServer(app);
 
 app.use(cors({
-  origin: process.env.VITE_SOCKET_URL ||  "https://chess-maxx.vercel.app", //
+  origin:  "https://chess-maxx.vercel.app", //
   credentials: true, // Allow cookies to be sent
 }));
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.VITE_SOCKET_URL || "https://chess-maxx.vercel.app",// Use VITE_SOCKET_URL or default to localhost
+    origin: "https://chess-maxx.vercel.app",// Use VITE_SOCKET_URL or default to localhost
     methods: ['GET', 'POST'],
     credentials: true,
   },
