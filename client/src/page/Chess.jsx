@@ -13,7 +13,7 @@ import {
   Clock,
   Users,
 } from "lucide-react";
-import toast, { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from "react-hot-toast";
 
 const initialTime = 300;
 const game = new Chess();
@@ -36,11 +36,11 @@ export function Chat({ username }) {
   const [blackMoves, setBlackMoves] = useState([]);
   const [paused, setPaused] = useState(false);
   const [opponentConnected, setOpponentConnected] = useState(false);
+  const [boardSize, setBoardSize] = useState(400);
 
   const socketRef = useRef(null);
   const timerRef = useRef(null);
 
-  // ✅ Firebase auth guard
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) window.location.href = "/login";
@@ -48,7 +48,6 @@ export function Chat({ username }) {
     return () => unsubscribe();
   }, []);
 
-  // ✅ Setup socket and listeners
   useEffect(() => {
     const socket = io("https://chessmaxx.onrender.com");
     socketRef.current = socket;
@@ -64,7 +63,6 @@ export function Chat({ username }) {
       setTimerRunning(true);
     });
 
-    // ✅ New: opponent is connected
     socket.on("opponent-connected", () => {
       setOpponentConnected(true);
     });
@@ -96,12 +94,10 @@ export function Chat({ username }) {
       setTimerRunning(true);
     });
 
-    socket.on("room-full", () => 
-    
-      toast.error("Room is full! Please create or join another room." ));
+    socket.on("room-full", () =>
+      toast.error("Room is full! Please create or join another room.")
+    );
 
-
-    // Rematch: reset board and timers for both players immediately
     socket.on("rematch-request", () => {
       game.reset();
       setFen(game.fen());
@@ -111,13 +107,22 @@ export function Chat({ username }) {
       setBlackMoves([]);
       setGameOver(false);
       setStatus(`🔁 Rematch in room ${roomId}. You are ${playerColor}`);
-      setTimerRunning(true); // Ensure timer resumes
+      setTimerRunning(true);
     });
 
     return () => socket.disconnect();
   }, []);
 
-  // ✅ Timer ticking logic
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setBoardSize(width < 640 ? 300 : 400);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   useEffect(() => {
     if (!timerRunning || paused || gameOver || !opponentConnected) return;
 
@@ -149,7 +154,11 @@ export function Chat({ username }) {
 
   const onDrop = (src, dst) => {
     if (!playerColor || !roomId || gameOver) return false;
-    if ((playerColor === "white" && game.turn() !== "w") || (playerColor === "black" && game.turn() !== "b")) return false;
+    if (
+      (playerColor === "white" && game.turn() !== "w") ||
+      (playerColor === "black" && game.turn() !== "b")
+    )
+      return false;
 
     const move = game.move({ from: src, to: dst, promotion: "q" });
     if (!move) return false;
@@ -210,7 +219,6 @@ export function Chat({ username }) {
   };
 
   const handleRematch = () => {
-    // Reset board and timers for the player who clicks rematch
     game.reset();
     setFen(game.fen());
     setWhiteTime(initialTime);
@@ -220,7 +228,6 @@ export function Chat({ username }) {
     setGameOver(false);
     setStatus(`🔁 Rematch in room ${roomId}. You are ${playerColor}`);
     setTimerRunning(true);
-    // Notify opponent
     socketRef.current.emit("rematch", { roomId });
   };
 
@@ -239,7 +246,6 @@ export function Chat({ username }) {
       window.location.href = "/";
     } catch {
       toast.error("Failed to log out. Please try again.");
-      console.error("Logout error:", error);
     }
   };
 
@@ -250,19 +256,17 @@ export function Chat({ username }) {
     return `${m}:${sec}`;
   };
 
-  // UI code remains the same..
-  // ✅ UI (abbreviated for brevity)
   return (
-   <div className="min-h-screen bg-gray-900 text-white">
-   <Toaster />
+    <div className="min-h-screen bg-gray-900 text-white">
+      <Toaster />
       {/* Header */}
       <header className="border-b border-gray-800 bg-gray-900">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-2">
             <Crown className="h-8 w-8 text-yellow-400" />
             <span className="text-2xl font-bold">ChessMax</span>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <div className="flex items-center space-x-2 text-gray-300">
               <Users className="h-4 w-4" />
               <span className="text-sm">Welcome, {username}</span>
@@ -280,42 +284,42 @@ export function Chat({ username }) {
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          {/* Room Setup */}
           {!roomId && (
             <div className="bg-gray-800 rounded-lg p-8 border border-gray-700 text-center mb-8">
               <Crown className="h-16 w-16 text-yellow-400 mx-auto mb-4" />
               <h1 className="text-3xl font-bold mb-2">Ready to Play Chess?</h1>
-              <p className="text-gray-400 mb-6">Create a new room or join an existing one</p>
-
+              <p className="text-gray-400 mb-6">
+                Create a new room or join an existing one
+              </p>
               <div className="max-w-md mx-auto space-y-4">
                 <input
                   type="text"
                   placeholder="Enter Room ID"
                   value={inputRoom}
                   onChange={(e) => setInputRoom(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-white placeholder-gray-400"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400"
                 />
-                <div className="flex gap-3 justify-center">
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <button
                     onClick={() => {
-                      const newId = generateRoomId()
-                      setRoomId(newId)
-                      joinRoom(newId)
+                      const newId = generateRoomId();
+                      setRoomId(newId);
+                      joinRoom(newId);
                     }}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-6 py-3 rounded-md transition-colors duration-200"
+                    className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-6 py-3 rounded-md"
                   >
                     Create Room
                   </button>
                   <button
                     onClick={() => {
                       if (inputRoom.trim()) {
-                        setRoomId(inputRoom.trim())
-                        joinRoom(inputRoom.trim())
-                      }else {
-                        toast.error("Please enter a valid Room ID.")
+                        setRoomId(inputRoom.trim());
+                        joinRoom(inputRoom.trim());
+                      } else {
+                        toast.error("Please enter a valid Room ID.");
                       }
                     }}
-                    className="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-6 py-3 rounded-md transition-colors duration-200"
+                    className="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-6 py-3 rounded-md"
                   >
                     Join Room
                   </button>
@@ -324,10 +328,9 @@ export function Chat({ username }) {
             </div>
           )}
 
-          {/* Game Interface */}
           {roomId && (
-            <div className="grid lg:grid-cols-3 gap-8">
-              {/* Left Panel - Game Info */}
+            <div className="flex flex-col lg:grid lg:grid-cols-3 gap-8">
+              {/* Left Panel */}
               <div className="space-y-6">
                 {/* Room Info */}
                 <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
@@ -339,13 +342,15 @@ export function Chat({ username }) {
                     <div>
                       <p className="text-gray-400 text-sm">Room ID</p>
                       <div className="flex items-center space-x-2">
-                        <span className="font-mono bg-gray-700 px-3 py-1 rounded text-yellow-400">{roomId}</span>
+                        <span className="font-mono bg-gray-700 px-3 py-1 rounded text-yellow-400">
+                          {roomId}
+                        </span>
                         <button
                           onClick={() => {
-                            navigator.clipboard.writeText(roomId)
-                            toast.success("Room ID copied to clipboard!")
+                            navigator.clipboard.writeText(roomId);
+                            toast.success("Room ID copied to clipboard!");
                           }}
-                          className="text-gray-400 hover:text-white transition-colors duration-200"
+                          className="text-gray-400 hover:text-white"
                         >
                           <Copy className="h-4 w-4" />
                         </button>
@@ -365,36 +370,36 @@ export function Chat({ username }) {
                     Timer
                   </h2>
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between">
                       <span className="text-gray-400">White</span>
-                      <span className={`font-mono text-lg ${whiteTime <= 30 ? "text-red-400" : "text-white"}`}>
+                      <span className={`font-mono ${whiteTime <= 30 ? "text-red-400" : "text-white"}`}>
                         {formatTime(whiteTime)}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between">
                       <span className="text-gray-400">Black</span>
-                      <span className={`font-mono text-lg ${blackTime <= 30 ? "text-red-400" : "text-white"}`}>
+                      <span className={`font-mono ${blackTime <= 30 ? "text-red-400" : "text-white"}`}>
                         {formatTime(blackTime)}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Game Actions */}
+                {/* Game Over Actions */}
                 {gameOver && (
                   <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
                     <h2 className="text-xl font-semibold mb-4">Game Over</h2>
                     <div className="space-y-3">
                       <button
                         onClick={handleRematch}
-                        className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-3 rounded-md transition-colors duration-200 flex items-center justify-center space-x-2"
+                        className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-3 rounded-md flex items-center justify-center gap-2"
                       >
                         <RotateCcw className="h-4 w-4" />
                         <span>Rematch</span>
                       </button>
                       <button
                         onClick={handleDownloadPGN}
-                        className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-md transition-colors duration-200 flex items-center justify-center space-x-2"
+                        className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-md flex items-center justify-center gap-2"
                       >
                         <Download className="h-4 w-4" />
                         <span>Download PGN</span>
@@ -404,19 +409,19 @@ export function Chat({ username }) {
                 )}
               </div>
 
-              {/* Center - Chess Board */}
+              {/* Chessboard */}
               <div className="flex justify-center">
-                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 w-full max-w-[90vw] sm:max-w-[400px] mx-auto">
                   <Chessboard
                     position={fen}
                     onPieceDrop={onDrop}
-                    boardWidth={400}
+                    boardWidth={boardSize}
                     boardOrientation={playerColor === "black" ? "black" : "white"}
                   />
                 </div>
               </div>
 
-              {/* Right Panel - Move History */}
+              {/* Move History */}
               <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
                 <h2 className="text-xl font-semibold mb-4">Move History</h2>
                 <div className="grid grid-cols-2 gap-4">
@@ -452,6 +457,6 @@ export function Chat({ username }) {
           )}
         </div>
       </div>
-    </div>
-  )
+    </div>
+  );
 }
